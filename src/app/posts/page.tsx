@@ -1,35 +1,29 @@
-"use client"
+"use server"
 
-import { db } from '@/db/drizzle';
+import CreatePost from '@/components/CreatePost';
+import { db } from '@/db';
+import { posts } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs';
-import { ChangeEvent, useState } from 'react';
+import { randomUUID } from 'crypto';
+import { ChangeEvent, useEffect, useState } from 'react';
 
 const PostPage = async () => {
-  const [input, setInput] = useState<string>()
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value)
-  }
-
-  // Needs use server environment.
   const user = await currentUser()
 
-  const posts = await db.query.posts.findMany()
+  const allPosts = await db.query.posts.findMany()
+
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        Hello, {user?.username}
+        Hello, {user?.username} : {user?.id}
       </div>
-      <div>
-        Make a post
-        <input onChange={handleChange}></input>
-        <button/>
-      </div>
+      
+      <CreatePost userId={user?.id} name={user?.username}/>
       <div>
         Posts
-        {posts.map((post, index) => (
-          <div key={index}>{post.message}</div>
+        {allPosts.map((post, index) => (
+          <div key={index}>{post.message}, {user?.username}</div>
         ))}
       </div>
     </main>
